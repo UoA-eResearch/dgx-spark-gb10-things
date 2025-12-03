@@ -22,6 +22,7 @@ from vllm import LLM, SamplingParams
 #    `ray start --address='192.168.100.1:6379' \
 #          --node-ip-address=192.168.100.2 \
 #          --num-gpus=1` # second node
+# d. Export your huggingface key on the first node: `export HF_TOKEN="<token>"`
 
 # --- 2. AUTHENTICATION ---
 hf_token = os.getenv("HF_TOKEN")
