@@ -3,6 +3,26 @@ import sys
 import time
 from vllm import LLM, SamplingParams
 
+# --- 1. PREREQUISITES
+# a. run in NVIDIA upstream vLLM container, pull to both nodes:
+#    `sudo docker run --gpus all --network=host --privileged --shm-size=16g -v $(pwd):/workspace -it --env RAY_grpc_enable_http_proxy=0 --env no_proxy="localhost,127.0.0.1,192.168.100.1,192.168.100.2" --name ray_head nvcr.io/nvidia/vllm:25.10-py3 bash`
+# b. set these environment variables on both nodes (in the vLLM container)
+#    ```export VLLM_HOST_IP=192.168.100.1
+#       export RAY_ADDRESS="192.168.100.1:6379"
+#       export GLOO_SOCKET_IFNAME=enp1s0f0np0
+#       export NCCL_SOCKET_IFNAME=enp1s0f0np0
+#       export VLLM_USE_V1=0
+#       export RAY_grpc_enable_http_proxy=0
+#       export no_proxy="localhost,127.0.0.1,0.0.0.0,::1,192.168.100.1,192.168.100.2"
+#       export NO_PROXY=$no_proxy
+#       export RAY_memory_monitor_refresh_ms=0
+#       export RAY_memory_usage_threshold=1.0```
+# c. Start the ray cluster on both nodes, in vLLM container
+#    `ray start --head --port=6379 --node-ip-address=192.168.100.1` #first node
+#    `ray start --address='192.168.100.1:6379' \
+#          --node-ip-address=192.168.100.2 \
+#          --num-gpus=1` # second node
+
 # --- 2. AUTHENTICATION ---
 hf_token = os.getenv("HF_TOKEN")
 if not hf_token:
