@@ -50,7 +50,7 @@ ray.init(
 )
 
 # --- STEP 3: INITIALIZE MODEL ---
-model_name = "Qwen/Qwen2.5-0.5B-Instruct"
+model_name = "meta-llama/Llama-3.1-405B"
 print(f"🧠 Loading {model_name}...")
 print("   Mode: Distributed RoCE v2 (Dual Rail)")
 
@@ -59,7 +59,7 @@ llm = LLM(
     tensor_parallel_size=2,
     trust_remote_code=True,
     dtype="bfloat16", 
-    gpu_memory_utilization=0.70,
+    gpu_memory_utilization=0.90,
     enforce_eager=True,
 )
 
