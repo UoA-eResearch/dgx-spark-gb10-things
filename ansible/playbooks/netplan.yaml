@@ -1,0 +1,76 @@
+
+---
+- name: Configure Netplan for management and ConnectX-7 rails
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars:
+    # File names under /etc/netplan
+    mgmt_netplan_filename: "01-mgmt.yaml"
+    rails_netplan_filename: "02-mlx-rails.yaml"
+
+    # --- Management interface (NetworkManager) ---
+    mgmt_iface: "enP7s7"
+    mgmt_mtu: 9000
+    mgmt_renderer: "NetworkManager"
+
+    # --- ConnectX-7 rails (NetworkManger) ---
+    rails_renderer: "NetworkManager"
+    rails_mtu: 9000
+
+    rails:
+      - name: "enp1s0f0np0"
+        addr: "192.168.100.1/24"
+      - name: "enp1s0f1np1"
+        addr: "192.168.101.1/24"
+      - name: "enP2p1s0f0np0"
+        addr: "192.168.102.1/24"
+      - name: "enP2p1s0f1np1"
+        addr: "192.168.103.1/24"
+
+  pre_tasks:
+    - name: Ensure NetworkManager is installed (Ubuntu/Debian)
+    # Skip if using a distro without apt; adjust for your OS if needed
+      ansible.builtin.package:
+        name: network-manager
+        state: present
+      when: ansible_pkg_mgr == "apt"
+
+    - name: Enable and start NetworkManager service
+      ansible.builtin.service:
+        name: NetworkManager
+        state: started
+        enabled: true
+      # Some minimal servers may not have NM; ignore errors if service is unavailable
+      ignore_errors: true
+
+  tasks:
+    - name: Deploy mgmt Netplan ({{ mgmt_netplan_filename }})
+      ansible.builtin.template:
+        src: "01-mgmt.yaml.j2"
+        dest: "/etc/netplan/{{ mgmt_netplan_filename }}"
+        owner: root
+        group: root
+        mode: "0644"
+        backup: true
+        validate: "netplan generate --root /"
+      notify: Apply netplan
+
+    - name: Deploy ConnectX-7 rails Netplan ({{ rails_netplan_filename }})
+      ansible.builtin.template:
+        src: "02-mlx-rails.yaml.j2"
+        dest: "/etc/netplan/{{ rails_netplan_filename }}"
+        owner: root
+        group: root
+        mode: "0644"
+        backup: true
+        validate: "netplan generate --root /"
+      notify: Apply netplan
+
+  handlers:
+    - name: Apply netplan
+      ansible.builtin.command: netplan apply
+      # Only run if the previous tasks changed something
+      when: ansible_facts['os_family'] in ['Debian', 'Ubuntu']
+

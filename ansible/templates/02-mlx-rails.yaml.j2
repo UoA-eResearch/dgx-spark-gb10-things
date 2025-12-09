@@ -1,0 +1,14 @@
+
+# {{ ansible_managed | default('Managed by Ansible') }}
+network:
+  version: 2
+  renderer: {{ rails_renderer }}
+  ethernets:
+{% for rail in rails %}
+    # --- {{ loop.index }} ({{ rail.addr.split('.')[2] }}) ---
+    {{ rail.name }}:
+      dhcp4: no
+      dhcp6: no
+      addresses:
+        - {{ rail.addr }}
+      mtu: {{ rails_mtu }}

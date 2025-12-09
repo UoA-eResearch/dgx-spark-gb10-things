@@ -1,0 +1,8 @@
+
+# {{ ansible_managed | default('Managed by Ansible') }}
+network:
+  version: 2
+  renderer: {{ mgmt_renderer }}
+  ethernets:
+    {{ mgmt_iface }}:
+      dhcp4: true
