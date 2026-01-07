@@ -54,7 +54,10 @@ os.environ.update(nccl_envs)
 print("✅ Configured Ray to ignore High RAM usage (Unified Memory Fix).")
 
 # --- 4. MODEL CONFIGURATION ---
-model_name = "meta-llama/Llama-3.3-70B-Instruct"
+#model_name = "meta-llama/Llama-3.3-70B-Instruct"
+#model_name = "allura-forge/Llama-3.3-8B-Instruct"
+model_name = "Qwen/Qwen3-VL-30B-A3B-Instruct"
+
 
 print(f"🚀 Initializing {model_name}...")
 
@@ -62,8 +65,9 @@ try:
     llm = LLM(
         model=model_name,
         tensor_parallel_size=2,
+        #tensor_parallel_size=1,
         dtype="bfloat16",
-        gpu_memory_utilization=0.87, 
+        gpu_memory_utilization=0.75, 
         
         # --- MEMORY SAFETY ---
         # We enable Eager Mode. This DISABLES CUDA Graphs.
